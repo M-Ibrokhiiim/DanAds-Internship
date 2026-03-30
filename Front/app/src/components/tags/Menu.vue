@@ -36,12 +36,11 @@ import { useI18n } from 'vue-i18n'
 const { locale } = useI18n()
 
 const isTokenExist = ref(false)
+
 const paramsFromUrl = new URLSearchParams(window.location.search);
 const authCode = paramsFromUrl.get("code");
  
-
-
-async function exchangeAuthToJWT(authToken:string){
+async function ExchangeAuthToJWT(authToken:string){
   if (authToken) {
   
   const tokenUrl = "https://eu-central-1bjxkrimqu.auth.eu-central-1.amazoncognito.com/oauth2/token";
@@ -85,7 +84,7 @@ function LogOut(){
 }
 
 onMounted(()=> {
-  exchangeAuthToJWT(authCode!)
+  ExchangeAuthToJWT(authCode!)
 })
 </script>
 
