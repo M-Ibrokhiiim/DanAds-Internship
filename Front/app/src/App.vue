@@ -5,11 +5,16 @@ import Week3 from '@/components/week3/Foundation.vue'
 import Week4 from '@/components/week4/Foundation.vue'
 import Week5 from '@/components/week5/Foundation.vue'
 import Week2 from './components/week2/vModel.vue';
+import Parent from '@/components/emit/Parent.vue';
 </script>
 
 <template>
   <div>
    <Menu/>
+  </div>
+
+  <div class="border-[10px] p-10 mt-[5vw] rounded-2xl border-blue-300 mb-[-50px] relative">
+     <Parent/>
   </div>
 
   <div class="border-[10px] p-10 mt-[5vw] rounded-2xl border-blue-300 mb-[-50px] relative">
