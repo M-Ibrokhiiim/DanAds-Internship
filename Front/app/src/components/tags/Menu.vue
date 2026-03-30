@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed top-0 left-0 w-full flex justify-between  shadow-lg z-50">
+  <div class="fixed top-0 left-0 w-full bg-white flex justify-between  shadow-lg z-50">
     <div class="w-[200px]   px-6 py-3 flex items-center justify-end"> 
       <div class="relative">
         <select
@@ -18,18 +18,75 @@
       </div>
     </div>
     <div class=" w-[150px] items-center flex justify-between mr-[20px]">  
-      <a href="https://eu-central-1bjxkrimqu.auth.eu-central-1.amazoncognito.com/login?client_id=79tlitdlu0haogq1201dt31kae&response_type=code&scope=openid+email+phone&redirect_uri=http://localhost:5173/">Login</a>
-      <a href="https://eu-central-1bjxkrimqu.auth.eu-central-1.amazoncognito.com/login?client_id=79tlitdlu0haogq1201dt31kae&response_type=code&scope=openid+email+phone&redirect_uri=http://localhost:5173/">Sign up</a> 
+      <a v-if="!isTokenExist" href="https://eu-central-1bjxkrimqu.auth.eu-central-1.amazoncognito.com/login?client_id=79tlitdlu0haogq1201dt31kae&response_type=code&scope=openid+email+phone&redirect_uri=http://localhost:5173/">Login</a>
+      <a v-if="!isTokenExist" href="https://eu-central-1bjxkrimqu.auth.eu-central-1.amazoncognito.com/login?client_id=79tlitdlu0haogq1201dt31kae&response_type=code&scope=openid+email+phone&redirect_uri=http://localhost:5173/">Sign up</a> 
+      <a
+        v-if="isTokenExist" 
+        href="#" 
+        @click="LogOut()"
+
+        >Log out</a>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted} from "vue"
 import { useI18n } from 'vue-i18n'
 const { locale } = useI18n()
 
-const isVisibleRegister = ref(false)
+const isTokenExist = ref(false)
+const paramsFromUrl = new URLSearchParams(window.location.search);
+const authCode = paramsFromUrl.get("code");
+ 
+
+
+async function exchangeAuthToJWT(authToken:string){
+  if (authToken) {
+  
+  const tokenUrl = "https://eu-central-1bjxkrimqu.auth.eu-central-1.amazoncognito.com/oauth2/token";
+ 
+  const bodyParams = new URLSearchParams();
+  bodyParams.append("grant_type", "authorization_code");  // fixed value
+  bodyParams.append("client_id", "79tlitdlu0haogq1201dt31kae");
+  bodyParams.append("code",authToken);                    
+  bodyParams.append("redirect_uri", "http://localhost:5173/");
+   
+  try{
+     const res = await fetch(tokenUrl,{
+      method: 'POST',
+      headers:{
+        "Content-Type": "application/x-www-form-urlencoded"       
+      },
+      body: bodyParams
+     })
+
+     const data = await res.json()
+      
+     localStorage.setItem('AccessToken',data.access_token)
+     localStorage.setItem('RefreshToken',data.refresh_token)
+
+     isTokenExist.value = true
+
+     console.log(data)
+  }catch(err){
+    console.log(err)
+  } 
+
+} else {
+  console.log("No authorization code in URL.");
+}
+}
+
+function LogOut(){
+  isTokenExist.value = false
+  localStorage.removeItem('AccessToken')
+  localStorage.removeItem('RefreshToken')
+}
+
+onMounted(()=> {
+  exchangeAuthToJWT(authCode!)
+})
 </script>
 
 <style scoped>
